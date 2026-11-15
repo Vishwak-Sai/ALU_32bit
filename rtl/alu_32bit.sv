@@ -100,29 +100,48 @@ module alu_32bit (
 
             end
 
-            // SLL - Day 5
+            // SLL
             4'h6: begin
+
                 valid = 1'b1;
+
+                result = a << b[4:0];
+
             end
 
-            // SRL - Day 5
+            // SRL
             4'h7: begin
+
                 valid = 1'b1;
+
+                result = a >> b[4:0];
+
             end
 
-            // SLT - Day 5
+            // SLT - Signed comparison
             4'h8: begin
+
                 valid = 1'b1;
+
+                result = ($signed(a) < $signed(b))
+                         ? 32'd1 : 32'd0;
+
             end
 
-            // SLTU - Day 5
+            // SLTU - Unsigned comparison
             4'h9: begin
+
                 valid = 1'b1;
+
+                result = (a < b) ? 32'd1 : 32'd0;
+
             end
 
             // Invalid opcode
             default: begin
+
                 valid = 1'b0;
+
             end
 
         endcase
