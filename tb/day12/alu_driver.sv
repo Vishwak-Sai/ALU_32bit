@@ -1,160 +1,93 @@
-
 `timescale 1ns/1ps
 
+
 // =============================================
-// DAY 12 - TASK 3
-// ALU DRIVER
+// DAY 12 - TASK 4
+// UPDATED ALU DRIVER
 // =============================================
 
 class alu_driver;
 
-    // -----------------------------------------
-    // 1. MAILBOX
-    // -----------------------------------------
+mailbox #(alu_transaction) gen2drv;
 
-    mailbox #(alu_transaction) gen2drv;
+virtual alu_if vif;
 
+int driven_count;
 
-    // -----------------------------------------
-    // 2. VIRTUAL INTERFACE
-    // -----------------------------------------
+// CONSTRUCTOR
 
-    virtual alu_if vif;
+function new(
+mailbox #(alu_transaction) mbx,
+virtual alu_if vif
+);
 
+gen2drv = mbx;
 
-    // -----------------------------------------
-    // 3. DRIVER COUNTER
-    // -----------------------------------------
+this.vif = vif;
 
-    int driven_count;
+driven_count = 0;
 
+endfunction
 
-    // -----------------------------------------
-    // 4. CONSTRUCTOR
-    // -----------------------------------------
+// DRIVER TASK
 
-    function new(
-        mailbox #(alu_transaction) mbx,
-        virtual alu_if vif
-    );
+task run(input int number_of_transactions);
 
-        gen2drv = mbx;
+alu_transaction trans;
 
-        this.vif = vif;
+$display("\n================================");
 
-        driven_count = 0;
+$display("ALU DRIVER STARTED");
 
-    endfunction
+$display("================================");
 
+repeat (number_of_transactions) begin
 
-    // -----------------------------------------
-    // 5. DRIVER TASK
-    // -----------------------------------------
+// Receive transaction
 
-    task run(input int number_of_transactions);
+gen2drv.get(trans);
 
-        alu_transaction trans;
+// Drive DUT inputs
 
-        $display("\n================================");
+vif.a = trans.a;
 
-        $display("DAY 12 ALU DRIVER STARTED");
+vif.b = trans.b;
 
-        $display("================================");
+vif.opcode = trans.opcode;
 
+vif.transaction_id = trans.transaction_id;
 
-        repeat (number_of_transactions) begin
+// Wait for combinational settling
 
-            // Receive transaction from generator
+#1;
 
-            gen2drv.get(trans);
+// Notify monitor
 
+vif.sample = 1'b1;
 
-            // Apply inputs to DUT
+#1;
 
-            vif.a = trans.a;
+vif.sample = 1'b0;
 
-            vif.b = trans.b;
+driven_count++;
 
-            vif.opcode = trans.opcode;
+$display(
+"DRIVER: ID=%0d OP=%h A=%h B=%h",
+trans.transaction_id,
+trans.opcode,
+trans.a,
+trans.b
+);
 
+end
 
-            // Wait for combinational settling
+$display("\nDRIVER COMPLETED");
 
-            #1;
+$display(
+"TOTAL TRANSACTIONS DRIVEN = %0d",
+driven_count
+);
 
-
-            // Store actual DUT outputs in transaction
-
-            trans.actual_result = vif.result;
-
-            trans.actual_zero = vif.zero;
-
-            trans.actual_carry = vif.carry;
-
-            trans.actual_overflow = vif.overflow;
-
-            trans.actual_valid = vif.valid;
-
-
-            driven_count = driven_count + 1;
-
-
-            // Display driven transaction
-
-            $display("--------------------------------");
-
-            $display(
-                "DRIVER: TRANSACTION ID = %0d",
-                trans.transaction_id
-            );
-
-            $display(
-                "DRIVER: OPCODE = %h",
-                vif.opcode
-            );
-
-            $display(
-                "DRIVER: A = %h",
-                vif.a
-            );
-
-            $display(
-                "DRIVER: B = %h",
-                vif.b
-            );
-
-            $display(
-                "DRIVER: RESULT = %h",
-                vif.result
-            );
-
-            $display(
-                "DRIVER: VALID = %b",
-                vif.valid
-            );
-
-            $display("--------------------------------");
-
-        end
-
-
-        // Driver summary
-
-        $display("\n================================");
-
-        $display("DRIVER SUMMARY");
-
-        $display("================================");
-
-        $display(
-            "TOTAL TRANSACTIONS DRIVEN = %0d",
-            driven_count
-        );
-
-        $display("DRIVER COMPLETED");
-
-        $display("================================");
-
-    endtask
+endtask
 
 endclass
