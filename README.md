@@ -2,25 +2,36 @@
 
 **Internship:** Vaidsys Technologies  
 **Domain:** VLSI Design and Functional Verification  
-**HDL:** Verilog / SystemVerilog  
-**Simulation:** QuestaSim 2025.2 (EDA Playground)
+**Design Language:** Verilog  
+**Verification Language:** SystemVerilog  
+**Simulation:** AMD Vivado 2026.1 (XSim)
+
+---
 
 ## 1. Project Overview
 
-This project focuses on the design and functional verification of a 32-bit Arithmetic Logic Unit (ALU) using Verilog and SystemVerilog.
+This project focuses on the RTL design and functional verification of a 32-bit Arithmetic Logic Unit (ALU).
 
-The ALU performs arithmetic, logical, shift and comparison operations. A class-based SystemVerilog testbench is developed to verify the functionality of the ALU using directed and randomized stimulus, a reference model, a self-checking scoreboard and functional coverage.
+The ALU supports arithmetic, logical, shift, and comparison operations. A modular, class-based SystemVerilog verification environment is used to validate its functionality through directed and randomized stimulus, a reference model, a self-checking scoreboard, and functional coverage.
+
+The project also includes behavioral simulation using AMD Vivado XSim, with saved waveform evidence and simulation logs.
 
 ## 2. Project Objectives
 
 - Design a 32-bit combinational ALU.
-- Implement arithmetic, logical, shift and comparison operations.
+- Implement arithmetic, logical, shift, and comparison operations.
 - Verify all supported and invalid opcodes.
 - Test arithmetic boundary conditions and status flags.
-- Develop a reusable class-based verification environment.
-- Measure functional coverage of opcodes and operand scenarios.
+- Develop reusable class-based verification components.
+- Implement a self-checking scoreboard.
+- Measure functional coverage.
+- Perform behavioral simulation and analyze waveforms.
 
-## 3. Supported ALU Operations
+## 3. ALU Functional Specification
+
+The ALU accepts two 32-bit operands (`a` and `b`) and a 4-bit opcode.
+
+### Supported operations
 
 | Opcode | Operation | Description |
 |---|---|---|
@@ -34,62 +45,62 @@ The ALU performs arithmetic, logical, shift and comparison operations. A class-b
 | 7 | SRL | Logical right shift |
 | 8 | SLT | Signed less-than comparison |
 | 9 | SLTU | Unsigned less-than comparison |
-| A–F | Invalid | Invalid operation handling |
+| A–F | Invalid | Invalid opcode handling |
 
-### Status Flags
+### Status flags
 
-The ALU generates the following status signals:
+| Flag | Description |
+|---|---|
+| Zero | Asserted when a valid operation produces a zero result |
+| Carry | Addition carry-out or no-borrow indication for subtraction |
+| Overflow | Indicates signed arithmetic overflow |
+| Valid | Indicates whether the opcode is supported |
 
-- **Zero:** Indicates whether the valid operation result is zero.
-- **Carry:** Indicates arithmetic carry for addition or no-borrow for subtraction.
-- **Overflow:** Indicates signed arithmetic overflow.
-- **Valid:** Indicates whether the opcode is supported.
+For shift operations, the shift amount is taken from the lower five bits of operand B.
 
 ## 4. Verification Architecture
 
 The project uses a modular, class-based SystemVerilog verification environment.
 
-### Verification Components
+### Verification components
 
 | Component | Responsibility |
 |---|---|
-| Transaction | Stores input stimulus and observed outputs |
+| Transaction | Stores stimulus and observed outputs |
 | Generator | Produces directed and randomized transactions |
 | Driver | Applies transactions to the DUT |
-| Interface | Connects the testbench to the ALU |
+| Interface | Connects the testbench and ALU |
 | Monitor | Captures DUT inputs and outputs |
-| Scoreboard | Compares actual outputs against expected results |
-| Coverage Collector | Tracks opcode and operand scenarios |
-| Environment | Instantiates and manages verification components |
+| Scoreboard | Compares actual outputs with expected results |
+| Coverage Collector | Tracks opcode and operand coverage |
+| Environment | Instantiates and coordinates verification components |
 
-### Verification Flow
+### Verification flow
 
-Generator → Driver → ALU DUT → Monitor → Scoreboard and Coverage Collector
+`Generator → Driver → ALU DUT → Monitor → Scoreboard and Coverage`
 
-The scoreboard uses a reference model to calculate expected outputs and identify mismatches.
+The scoreboard uses a reference model to calculate expected results and check the DUT outputs.
 
 ## 5. Verification Methodology
 
-The following verification techniques are implemented:
+### Directed testing
 
-### Directed Testing
-
-Directed transactions exercise all 16 opcode values, including invalid opcodes.
+Directed tests exercise all 16 opcode values, including invalid opcodes.
 
 Additional arithmetic corner cases include:
 
 - Signed addition overflow.
-- Addition carry.
+- Addition carry-out.
 - Subtraction borrow.
 - Signed subtraction overflow.
 
-### Randomized Testing
+### Randomized testing
 
 Randomized transactions exercise different operand values and operation combinations.
 
-### Self-Checking Scoreboard
+### Self-checking scoreboard
 
-The scoreboard compares the DUT outputs with the reference model, checking:
+The scoreboard checks:
 
 - Result
 - Zero flag
@@ -97,7 +108,7 @@ The scoreboard compares the DUT outputs with the reference model, checking:
 - Overflow flag
 - Valid flag
 
-### Functional Coverage
+### Functional coverage
 
 The coverage collector tracks:
 
@@ -107,17 +118,25 @@ The coverage collector tracks:
 - Opcode versus operand A cross coverage.
 - Opcode versus operand B cross coverage.
 
-## 6. Tools and Technologies
+## 6. Simulation and Tools
 
-- Verilog
-- SystemVerilog
-- EDA Playground
-- QuestaSim 2025.2
-- EPWave
+| Tool | Purpose |
+|---|---|
+| Verilog | RTL implementation |
+| SystemVerilog | Verification environment |
+| AMD Vivado 2026.1 | FPGA design and simulation environment |
+| Vivado XSim | Behavioral simulation |
+| EDA Playground / QuestaSim 2025.2 | Earlier functional coverage development and testing |
+| VS Code | Source code and documentation management |
+| Git and GitHub | Version control |
 
-## 7. Latest Verification Results
+The project was simulated using Vivado XSim with the `scoreboard_smoke_tb` top-level testbench.
 
-The latest completed simulation executed 30 transactions:
+## 7. Verification Results
+
+The completed Day 13 regression executed 30 transactions.
+
+### Scoreboard summary
 
 | Metric | Result |
 |---|---:|
@@ -130,7 +149,9 @@ The latest completed simulation executed 30 transactions:
 | Scoreboard passes | 30 |
 | Scoreboard failures | 0 |
 
-### Functional Coverage Results
+**Simulation status: PASSED**
+
+### Functional coverage results
 
 | Coverage Metric | Achieved |
 |---|---:|
@@ -141,12 +162,27 @@ The latest completed simulation executed 30 transactions:
 | Opcode × Operand B | 2.50% |
 | Overall coverage | 37.25% |
 
-**Note:** These are the results from the current 30-transaction regression. Operand boundary and cross coverage remain areas for improvement.
+**Coverage note:** These results represent the current 30-transaction regression. Although all opcode bins were exercised, operand boundary and cross coverage are incomplete and require further testing.
 
-## 8. Project Structure
+## 8. Waveform Evidence
+
+The Vivado XSim behavioral simulation waveform is saved in the `results/` directory.
+
+| File | Description |
+|---|---|
+| `alu_vivado_waveform.png` | Waveform screenshot for visual inspection |
+| `alu_vivado_waveform.wcfg` | Vivado waveform configuration |
+| `alu_vivado_simulate.log` | Simulation execution log |
+
+The waveform includes ALU inputs, opcode, result, status flags, and testbench synchronization signals.
+
+## 9. Project Structure
 
 ```text
 vaidsys-32bit-alu/
+│
+├── ALU_32bit_Verification/
+│   └── ALU_32bit_Verification.xpr
 │
 ├── rtl/
 │   └── alu_32bit.sv
@@ -163,32 +199,52 @@ vaidsys-32bit-alu/
 │   └── day13/
 │       ├── alu_coverage.sv
 │       ├── alu_environment.sv
-│       └── scoreboard_smoke_tb.sv
+│       ├── scoreboard_smoke_tb.sv
+│       └── smoke_tests/
+│           └── coverage_test.sv
 │
 ├── docs/
+│   ├── alu_specification.md
+│   ├── Architecture.md
+│   ├── verification_plan.md
+│   └── Verification_Results.md
+│
 ├── results/
+│   ├── simulation/
+│   ├── synthesis/
+│   ├── waveforms/
+│   ├── alu_vivado_simulate.log
+│   ├── alu_vivado_waveform.png
+│   └── alu_vivado_waveform.wcfg
+│
 ├── scripts/
-└── sim/
+├── sim/
+├── .gitignore
+└── README.md
 ```
 
-## 9. Current Project Status
+## 10. Current Project Status
 
-- ALU RTL implementation completed.
+- 32-bit ALU RTL implementation completed.
 - Class-based verification components implemented.
-- Generator, driver, monitor and scoreboard integrated.
+- Generator, driver, monitor, and scoreboard integrated.
 - Verification environment implemented.
 - Functional coverage collector integrated.
-- 30-transaction simulation completed successfully.
-- Boundary-value and cross coverage improvements pending.
-- Final regression and documentation refinement pending.
+- 30-transaction regression completed successfully.
+- Vivado XSim behavioral simulation completed.
+- Waveform configuration and screenshot saved.
+- Simulation log saved.
+- Additional boundary-value and cross-coverage testing remains an improvement area.
 
-## 10. Future Improvements
+## 11. Future Improvements
 
 - Expand directed boundary-value testing.
 - Improve opcode and operand cross coverage.
 - Increase randomized regression size.
 - Add additional assertions and corner-case checks.
-- Perform final regression and document waveform results.
+- Perform synthesis and analyze resource utilization.
+- Analyze timing reports and document synthesis results.
+- Run a larger final regression.
 
 ---
 
