@@ -1,137 +1,197 @@
 # 32-bit ALU Design and Verification
 
 **Internship:** Vaidsys Technologies  
-**Domain:** VLSI Design and Verification  
-**Project:** 32-bit Arithmetic Logic Unit (ALU)  
-**HDL:** SystemVerilog
+**Domain:** VLSI Design and Functional Verification  
+**HDL:** Verilog / SystemVerilog  
+**Simulation:** QuestaSim 2025.2 (EDA Playground)
 
-## Project Overview
+## 1. Project Overview
 
-This project focuses on the design and functional verification of a 32-bit combinational Arithmetic Logic Unit (ALU) using SystemVerilog.
+This project focuses on the design and functional verification of a 32-bit Arithmetic Logic Unit (ALU) using Verilog and SystemVerilog.
 
-The ALU supports arithmetic, logical, shift, and comparison operations. A self-checking verification environment is being developed to validate the functionality of the design using directed stimulus, boundary-value scenarios, and randomized testing.
+The ALU performs arithmetic, logical, shift and comparison operations. A class-based SystemVerilog testbench is developed to verify the functionality of the ALU using directed and randomized stimulus, a reference model, a self-checking scoreboard and functional coverage.
 
-## Supported ALU Operations
+## 2. Project Objectives
+
+- Design a 32-bit combinational ALU.
+- Implement arithmetic, logical, shift and comparison operations.
+- Verify all supported and invalid opcodes.
+- Test arithmetic boundary conditions and status flags.
+- Develop a reusable class-based verification environment.
+- Measure functional coverage of opcodes and operand scenarios.
+
+## 3. Supported ALU Operations
 
 | Opcode | Operation | Description |
 |---|---|---|
-| 0 | ADD | 32-bit addition |
-| 1 | SUB | 32-bit subtraction |
+| 0 | ADD | Addition |
+| 1 | SUB | Subtraction |
 | 2 | AND | Bitwise AND |
 | 3 | OR | Bitwise OR |
 | 4 | XOR | Bitwise XOR |
-| 5 | NOT | Bitwise complement of A |
-| 6 | SLL | Logical shift left |
-| 7 | SRL | Logical shift right |
+| 5 | NOT | Bitwise NOT of operand A |
+| 6 | SLL | Logical left shift |
+| 7 | SRL | Logical right shift |
 | 8 | SLT | Signed less-than comparison |
 | 9 | SLTU | Unsigned less-than comparison |
-| A–F | Invalid | Unsupported operations |
+| A–F | Invalid | Invalid operation handling |
 
-### Output Flags
+### Status Flags
 
-- **Zero:** Indicates whether the valid ALU result is zero.
-- **Carry:** Indicates arithmetic carry for addition and no-borrow for subtraction.
+The ALU generates the following status signals:
+
+- **Zero:** Indicates whether the valid operation result is zero.
+- **Carry:** Indicates arithmetic carry for addition or no-borrow for subtraction.
 - **Overflow:** Indicates signed arithmetic overflow.
-- **Valid:** Indicates whether the selected opcode is supported.
+- **Valid:** Indicates whether the opcode is supported.
 
-## Verification Architecture
+## 4. Verification Architecture
 
 The project uses a modular, class-based SystemVerilog verification environment.
 
-Components implemented:
+### Verification Components
 
-- **Transaction:** Represents input stimulus and captured output data.
-- **Generator:** Produces directed and randomized transactions.
-- **Mailbox:** Transfers transactions between verification components.
-- **Interface:** Connects the testbench components to the DUT.
-- **Driver:** Applies stimulus to the ALU.
-- **Monitor:** Captures DUT inputs and outputs.
-- **Scoreboard:** Calculates expected results and compares them against actual DUT outputs.
-- **Reference Model:** Provides expected ALU operation results for checking.
+| Component | Responsibility |
+|---|---|
+| Transaction | Stores input stimulus and observed outputs |
+| Generator | Produces directed and randomized transactions |
+| Driver | Applies transactions to the DUT |
+| Interface | Connects the testbench to the ALU |
+| Monitor | Captures DUT inputs and outputs |
+| Scoreboard | Compares actual outputs against expected results |
+| Coverage Collector | Tracks opcode and operand scenarios |
+| Environment | Instantiates and manages verification components |
 
-## Verification Strategy
+### Verification Flow
 
-The verification environment includes:
+Generator → Driver → ALU DUT → Monitor → Scoreboard and Coverage Collector
 
-1. Directed testing of all supported and invalid opcodes.
-2. Boundary-value testing for arithmetic operations.
-3. Signed overflow and carry-condition testing.
-4. Subtraction borrow-condition testing.
-5. Randomized input stimulus.
-6. Self-checking scoreboard comparisons.
-7. Simulation waveform inspection.
+The scoreboard uses a reference model to calculate expected outputs and identify mismatches.
 
-## Tools and Technologies
+## 5. Verification Methodology
 
+The following verification techniques are implemented:
+
+### Directed Testing
+
+Directed transactions exercise all 16 opcode values, including invalid opcodes.
+
+Additional arithmetic corner cases include:
+
+- Signed addition overflow.
+- Addition carry.
+- Subtraction borrow.
+- Signed subtraction overflow.
+
+### Randomized Testing
+
+Randomized transactions exercise different operand values and operation combinations.
+
+### Self-Checking Scoreboard
+
+The scoreboard compares the DUT outputs with the reference model, checking:
+
+- Result
+- Zero flag
+- Carry flag
+- Overflow flag
+- Valid flag
+
+### Functional Coverage
+
+The coverage collector tracks:
+
+- Opcode coverage.
+- Operand A boundary categories.
+- Operand B boundary categories.
+- Opcode versus operand A cross coverage.
+- Opcode versus operand B cross coverage.
+
+## 6. Tools and Technologies
+
+- Verilog
 - SystemVerilog
-- Questa Simulator 2025.2
 - EDA Playground
+- QuestaSim 2025.2
 - EPWave
-- Visual Studio Code
-- Git and GitHub
 
-## Project Progress
+## 7. Latest Verification Results
 
-| Day | Milestone | Status |
-|---|---|---|
-| Day 1 | Specification and simulation environment setup | Completed |
-| Day 2–10 | RTL design and foundational verification activities | Completed |
-| Day 12 | Transaction, generator, driver, monitor, and scoreboard integration | Completed |
-| Day 13 onward | Functional coverage and advanced verification activities | Upcoming |
-
-### Day 12 Verification Results
-
-The integrated verification environment was tested with 30 transactions.
+The latest completed simulation executed 30 transactions:
 
 | Metric | Result |
 |---|---:|
-| Transactions Generated | 30 |
-| Transactions Driven | 30 |
-| Transactions Monitored | 30 |
-| Scoreboard Checked | 30 |
-| Scoreboard Passed | 30 |
-| Scoreboard Failed | 0 |
+| Directed transactions | 20 |
+| Random transactions | 10 |
+| Total generated | 30 |
+| Total driven | 30 |
+| Total monitored | 30 |
+| Scoreboard checks | 30 |
+| Scoreboard passes | 30 |
+| Scoreboard failures | 0 |
 
-**Result: 30/30 transactions passed the scoreboard checks.**
+### Functional Coverage Results
 
-## Project Directory Structure
+| Coverage Metric | Achieved |
+|---|---:|
+| Opcode coverage | 100.00% |
+| Operand A coverage | 60.00% |
+| Operand B coverage | 20.00% |
+| Opcode × Operand A | 3.75% |
+| Opcode × Operand B | 2.50% |
+| Overall coverage | 37.25% |
+
+**Note:** These are the results from the current 30-transaction regression. Operand boundary and cross coverage remain areas for improvement.
+
+## 8. Project Structure
 
 ```text
 vaidsys-32bit-alu/
 │
-├── docs/
-├── results/
 ├── rtl/
 │   └── alu_32bit.sv
+│
+├── tb/
+│   ├── day12/
+│   │   ├── alu_transaction.sv
+│   │   ├── alu_generator.sv
+│   │   ├── alu_interface.sv
+│   │   ├── alu_driver.sv
+│   │   ├── alu_monitor.sv
+│   │   └── alu_scoreboard.sv
+│   │
+│   └── day13/
+│       ├── alu_coverage.sv
+│       ├── alu_environment.sv
+│       └── scoreboard_smoke_tb.sv
+│
+├── docs/
+├── results/
 ├── scripts/
-├── sim/
-└── tb/
-    ├── day12/
-    │   ├── smoke_tests/
-    │   ├── alu_transaction.sv
-    │   ├── alu_generator.sv
-    │   ├── alu_interface.sv
-    │   ├── alu_driver.sv
-    │   ├── alu_monitor.sv
-    │   ├── alu_scoreboard.sv
-    │   ├── alu_environment.sv
-    │   └── scoreboard_smoke_tb.sv
-    └── daily_tests/
+└── sim/
 ```
 
-## Future Work
+## 9. Current Project Status
 
-- Implement functional coverage.
-- Improve randomized stimulus and constraints.
-- Expand boundary-value and corner-case testing.
-- Strengthen reference-model independence.
-- Perform regression testing.
-- Analyze functional coverage results.
-- Integrate and validate the complete verification environment.
+- ALU RTL implementation completed.
+- Class-based verification components implemented.
+- Generator, driver, monitor and scoreboard integrated.
+- Verification environment implemented.
+- Functional coverage collector integrated.
+- 30-transaction simulation completed successfully.
+- Boundary-value and cross coverage improvements pending.
+- Final regression and documentation refinement pending.
 
-## Internship
+## 10. Future Improvements
 
-**Vaidsys Technologies**  
-VLSI Design and Verification Internship
+- Expand directed boundary-value testing.
+- Improve opcode and operand cross coverage.
+- Increase randomized regression size.
+- Add additional assertions and corner-case checks.
+- Perform final regression and document waveform results.
 
-This project is being developed incrementally as part of the internship, with implementation details, verification results, and milestones documented throughout the development process.
+---
+
+**Project:** 32-bit ALU Design and Verification  
+**Internship:** Vaidsys Technologies  
+**Focus:** RTL Design and Functional Verification

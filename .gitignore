@@ -1,7 +1,38 @@
 
+# Simulation and compiled files
 *.vvp
 *.vcd
 *.fst
-*.log
 *.out
 *.o
+
+# Ignore general logs, but preserve project evidence
+*.log
+!results/*.log
+
+# Vivado generated files
+ALU_32bit_Verification/.Xil/
+ALU_32bit_Verification/*.cache/
+ALU_32bit_Verification/*.runs/
+ALU_32bit_Verification/*.sim/
+ALU_32bit_Verification/*.gen/
+ALU_32bit_Verification/*.hw/
+ALU_32bit_Verification/ip_user_files/
+
+# Vivado temporary and backup files
+*.jou
+*.str
+*.backup
+*.tmp
+
+# Editor and operating system files
+.vscode/
+.DS_Store
+Thumbs.db
+
+
+# ModelSim / Questa generated library files
+/work/
+*.qdb
+*.qpg
+*.qtl

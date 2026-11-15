@@ -2,43 +2,29 @@
 `timescale 1ns/1ps
 
 // =============================================
-// DAY 12 - TASK 2
-// ALU GENERATOR
+// DAY 13 - ALU GENERATOR
+// 20 DIRECTED + 10 RANDOM TRANSACTIONS
 // =============================================
 
 class alu_generator;
 
-    // -----------------------------------------
-    // 1. MAILBOX
-    // -----------------------------------------
-
+    // Mailbox
     mailbox #(alu_transaction) gen2drv;
 
-
-    // -----------------------------------------
-    // 2. GENERATOR VARIABLES
-    // -----------------------------------------
-
+    // Generator variables
     int transaction_count;
-
     int directed_count;
-
     int random_count;
-
     int transaction_id;
 
-
-    // -----------------------------------------
-    // 3. CONSTRUCTOR
-    // -----------------------------------------
-
+    // Constructor
     function new(mailbox #(alu_transaction) mbx);
 
         gen2drv = mbx;
 
         transaction_count = 0;
 
-        directed_count = 10;
+        directed_count = 20;
 
         random_count = 10;
 
@@ -47,18 +33,13 @@ class alu_generator;
     endfunction
 
 
-    // -----------------------------------------
-    // 4. GENERATOR TASK
-    // -----------------------------------------
-
+    // Generator task
     task run();
 
         alu_transaction trans;
 
         $display("\n================================");
-
-        $display("DAY 12 ALU GENERATOR STARTED");
-
+        $display("DAY 13 ALU GENERATOR STARTED");
         $display("================================");
 
 
@@ -70,39 +51,78 @@ class alu_generator;
 
         for (int i = 0; i < directed_count; i++) begin
 
-            // Create a new transaction object
-
             trans = new();
 
-            transaction_id = transaction_id + 1;
+            transaction_id++;
 
             trans.transaction_id = transaction_id;
 
+            // First 16 transactions exercise opcodes 0-F
+            if (i < 16) begin
 
-            // Assign opcode
+                trans.opcode = i[3:0];
 
-            trans.opcode = i[3:0];
+                trans.a = 32'h00000005;
 
+                trans.b = 32'h00000003;
 
-            // Assign directed operands
+            end
 
-            trans.a = 32'h00000005;
+            // ADD signed overflow
+            else if (i == 16) begin
 
-            trans.b = 32'h00000003;
+                trans.opcode = 4'h0;
 
+                trans.a = 32'h7FFFFFFF;
 
-            // Send transaction to mailbox
+                trans.b = 32'h00000001;
 
+            end
+
+            // ADD carry
+            else if (i == 17) begin
+
+                trans.opcode = 4'h0;
+
+                trans.a = 32'hFFFFFFFF;
+
+                trans.b = 32'h00000001;
+
+            end
+
+            // SUB borrow
+            else if (i == 18) begin
+
+                trans.opcode = 4'h1;
+
+                trans.a = 32'h00000003;
+
+                trans.b = 32'h00000005;
+
+            end
+
+            // SUB signed overflow
+            else begin
+
+                trans.opcode = 4'h1;
+
+                trans.a = 32'h80000000;
+
+                trans.b = 32'h00000001;
+
+            end
+
+            // Send transaction
             gen2drv.put(trans);
 
-
-            transaction_count = transaction_count + 1;
-
+            transaction_count++;
 
             $display(
-                "GENERATOR: Directed transaction %0d generated, OP=%h",
+                "GENERATOR: Directed ID=%0d OP=%h A=%h B=%h",
                 transaction_id,
-                trans.opcode
+                trans.opcode,
+                trans.a,
+                trans.b
             );
 
         end
@@ -116,14 +136,9 @@ class alu_generator;
 
         for (int i = 0; i < random_count; i++) begin
 
-            // Create a new transaction object
-
             trans = new();
 
-            transaction_id = transaction_id + 1;
-
-
-            // Randomize opcode and operands
+            transaction_id++;
 
             if (!trans.randomize()) begin
 
@@ -131,24 +146,18 @@ class alu_generator;
 
             end
 
-
-            // Assign transaction ID
-
             trans.transaction_id = transaction_id;
-
-
-            // Send transaction to mailbox
 
             gen2drv.put(trans);
 
-
-            transaction_count = transaction_count + 1;
-
+            transaction_count++;
 
             $display(
-                "GENERATOR: Random transaction %0d generated, OP=%h",
+                "GENERATOR: Random ID=%0d OP=%h A=%h B=%h",
                 transaction_id,
-                trans.opcode
+                trans.opcode,
+                trans.a,
+                trans.b
             );
 
         end
@@ -159,9 +168,7 @@ class alu_generator;
         // =====================================
 
         $display("\n================================");
-
         $display("GENERATOR SUMMARY");
-
         $display("================================");
 
         $display(
@@ -180,7 +187,6 @@ class alu_generator;
         );
 
         $display("GENERATOR COMPLETED");
-
         $display("================================");
 
     endtask

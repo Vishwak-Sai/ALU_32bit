@@ -2,8 +2,7 @@
 `timescale 1ns/1ps
 
 // =============================================
-// DAY 12 - TASK 4
-// ALU MONITOR
+// DAY 13 - ALU MONITOR WITH FUNCTIONAL COVERAGE
 // =============================================
 
 class alu_monitor;
@@ -23,24 +22,34 @@ class alu_monitor;
 
 
     // -----------------------------------------
-    // 3. MONITOR COUNTER
+    // 3. FUNCTIONAL COVERAGE HANDLE
+    // -----------------------------------------
+
+    alu_coverage coverage;
+
+
+    // -----------------------------------------
+    // 4. MONITOR COUNTER
     // -----------------------------------------
 
     int monitored_count;
 
 
     // -----------------------------------------
-    // 4. CONSTRUCTOR
+    // 5. CONSTRUCTOR
     // -----------------------------------------
 
     function new(
         virtual alu_if vif,
-        mailbox #(alu_transaction) mbx
+        mailbox #(alu_transaction) mbx,
+        alu_coverage coverage
     );
 
         this.vif = vif;
 
-        mon2scb = mbx;
+        this.mon2scb = mbx;
+
+        this.coverage = coverage;
 
         monitored_count = 0;
 
@@ -48,7 +57,7 @@ class alu_monitor;
 
 
     // -----------------------------------------
-    // 5. MONITOR TASK
+    // 6. MONITOR TASK
     // -----------------------------------------
 
     task run(input int number_of_transactions);
@@ -107,7 +116,16 @@ class alu_monitor;
             monitored_count++;
 
 
-            // Display observed transaction
+            // ---------------------------------
+            // SAMPLE FUNCTIONAL COVERAGE
+            // ---------------------------------
+
+            coverage.sample_transaction(trans);
+
+
+            // ---------------------------------
+            // DISPLAY OBSERVED TRANSACTION
+            // ---------------------------------
 
             $display("--------------------------------");
 
@@ -159,14 +177,19 @@ class alu_monitor;
             $display("--------------------------------");
 
 
-            // Send observed transaction to scoreboard
+            // ---------------------------------
+            // SEND OBSERVED TRANSACTION
+            // TO SCOREBOARD
+            // ---------------------------------
 
             mon2scb.put(trans);
 
         end
 
 
-        // Monitor summary
+        // -------------------------------------
+        // MONITOR SUMMARY
+        // -------------------------------------
 
         $display("\n================================");
 
